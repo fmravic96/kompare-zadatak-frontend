@@ -10,13 +10,13 @@ import { DataGrid } from "@material-ui/data-grid";
 import { connect } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ClipLoader from "react-spinners/ClipLoader";
 
-import { getUsers, createUser } from "./store/actions/users";
+import { getUsers, createUser, deleteUsers } from "./store/actions/users";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    textAlign: "center",
   },
   actionButtons: {
     margin: theme.spacing(4),
@@ -30,8 +30,9 @@ const theme = createMuiTheme({
   },
 });
 
-const User = ({ users, getUsers, createUser }) => {
+const User = ({ users, getUsers, createUser, deleteUsers }) => {
   const [open, setOpen] = useState(false);
+  const [selectionModel, setSelectionModel] = useState([]);
   useEffect(() => {
     getUsers();
   }, [getUsers]);
@@ -56,6 +57,11 @@ const User = ({ users, getUsers, createUser }) => {
     createUser(data);
     toast.success(`Added user ${data.firstName} ${data.lastName}`);
     setOpen(false);
+  };
+
+  const handleDelete = () => {
+    deleteUsers(selectionModel);
+    toast.success(`Deleted ${selectionModel.length} user/s`);
   };
 
   const fnameRef = useRef();
@@ -84,58 +90,56 @@ const User = ({ users, getUsers, createUser }) => {
               <b>Zadatak - Kompare</b>
             </Typography>
           </Grid>
-          {users ? (
-            <>
-              {users.length === 0 ? (
-                <Typography variant="h3">No users available.</Typography>
-              ) : (
-                <>
-                  <div style={{ width: "100%" }}>
-                    <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection pageSize={10} pagination loading={users === null} />
-                  </div>
 
-                  <Grid item xs={12}>
-                    <Grid container justify="center">
-                      <ThemeProvider theme={theme}>
-                        <Button
-                          variant="contained"
-                          onClick={handleClickOpen}
-                          color="primary"
-                          className={classes.actionButtons}
-                          startIcon={<AddIcon />}
-                        >
-                          Add new user
-                        </Button>
-                        <Button variant="contained" color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
-                          Delete selected user/s
-                        </Button>
-                      </ThemeProvider>
-                      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                        <DialogTitle id="form-dialog-title">Add new user</DialogTitle>
-                        <DialogContent>
-                          <form noValidate autoComplete="off" onSubmit={(e) => handleSubmit(e)}>
-                            <TextField required autoFocus margin="dense" id="fname" label="First name" type="text" fullWidth inputRef={fnameRef} />
-                            <TextField required margin="dense" id="lname" label="Last name" type="text" fullWidth inputRef={lnameRef} />
-                            <TextField required margin="dense" id="email" label="Email Address" type="email" fullWidth inputRef={emailRef} />
-                            <DialogActions>
-                              <Button onClick={handleClose} color="primary">
-                                Cancel
-                              </Button>
-                              <Button type="submit" onClick={handleClose} color="primary">
-                                Add user
-                              </Button>
-                            </DialogActions>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
-                    </Grid>
-                  </Grid>
-                </>
-              )}
-            </>
+          {users?.length === 0 ? (
+            <Typography variant="h3">No users available.</Typography>
           ) : (
-            <ClipLoader color="teal" size={150} />
+            <div style={{ width: "100%" }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                autoHeight
+                checkboxSelection
+                pageSize={10}
+                pagination
+                loading={users === null}
+                onSelectionModelChange={(newSelection) => {
+                  setSelectionModel(newSelection.selectionModel);
+                }}
+                selectionModel={selectionModel}
+              />
+            </div>
           )}
+          <Grid item xs={12}>
+            <Grid container justify="center">
+              <ThemeProvider theme={theme}>
+                <Button variant="contained" onClick={handleClickOpen} color="primary" className={classes.actionButtons} startIcon={<AddIcon />}>
+                  Add new user
+                </Button>
+                <Button variant="contained" onClick={handleDelete} color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
+                  Delete selected user/s
+                </Button>
+              </ThemeProvider>
+              <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+                <DialogTitle id="form-dialog-title">Add new user</DialogTitle>
+                <DialogContent>
+                  <form noValidate autoComplete="off" onSubmit={(e) => handleSubmit(e)}>
+                    <TextField required autoFocus margin="dense" id="fname" label="First name" type="text" fullWidth inputRef={fnameRef} />
+                    <TextField required margin="dense" id="lname" label="Last name" type="text" fullWidth inputRef={lnameRef} />
+                    <TextField required margin="dense" id="email" label="Email Address" type="email" fullWidth inputRef={emailRef} />
+                    <DialogActions>
+                      <Button onClick={handleClose} color="primary">
+                        Cancel
+                      </Button>
+                      <Button type="submit" onClick={handleClose} color="primary">
+                        Add user
+                      </Button>
+                    </DialogActions>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </Grid>
+          </Grid>
         </Grid>
       </Container>
 
@@ -154,4 +158,4 @@ const User = ({ users, getUsers, createUser }) => {
   );
 };
 
-export default connect((store) => ({ users: store.users }), { getUsers, createUser })(User);
+export default connect((store) => ({ users: store.users }), { getUsers, createUser, deleteUsers })(User);
