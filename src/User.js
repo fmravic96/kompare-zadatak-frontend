@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Container, Typography, Grid, makeStyles, Button } from "@material-ui/core";
+import React, { useEffect, useState, useRef } from "react";
+import { Container, Typography, Grid, makeStyles, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@material-ui/core";
 import green from "@material-ui/core/colors/green";
 import red from "@material-ui/core/colors/red";
 import { ThemeProvider } from "@material-ui/styles";
@@ -12,7 +12,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ClipLoader from "react-spinners/ClipLoader";
 
-import { getUsers } from "./store/actions/users";
+import { getUsers, createUser } from "./store/actions/users";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,14 +30,37 @@ const theme = createMuiTheme({
   },
 });
 
-const User = ({ users, getUsers }) => {
+const User = ({ users, getUsers, createUser }) => {
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    setTimeout(() => {
-      getUsers();
-    }, 2000);
+    getUsers();
   }, [getUsers]);
 
   const classes = useStyles();
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const data = {
+      firstName: fnameRef.current.value,
+      lastName: lnameRef.current.value,
+      email: emailRef.current.value,
+    };
+    createUser(data);
+    toast.success(`Added user ${data.firstName} ${data.lastName}`);
+    setOpen(false);
+  };
+
+  const fnameRef = useRef();
+  const lnameRef = useRef();
+  const emailRef = useRef();
 
   const columns = [
     { field: "firstName", headerName: "First Name", flex: 1 },
@@ -68,19 +91,43 @@ const User = ({ users, getUsers }) => {
               ) : (
                 <>
                   <div style={{ width: "100%" }}>
-                    <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection hideFooterPagination />
+                    <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection pageSize={10} pagination loading={users === null} />
                   </div>
 
                   <Grid item xs={12}>
                     <Grid container justify="center">
                       <ThemeProvider theme={theme}>
-                        <Button variant="contained" color="primary" className={classes.actionButtons} startIcon={<AddIcon />}>
+                        <Button
+                          variant="contained"
+                          onClick={handleClickOpen}
+                          color="primary"
+                          className={classes.actionButtons}
+                          startIcon={<AddIcon />}
+                        >
                           Add new user
                         </Button>
                         <Button variant="contained" color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
                           Delete selected user/s
                         </Button>
                       </ThemeProvider>
+                      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+                        <DialogTitle id="form-dialog-title">Add new user</DialogTitle>
+                        <DialogContent>
+                          <form noValidate autoComplete="off" onSubmit={(e) => handleSubmit(e)}>
+                            <TextField required autoFocus margin="dense" id="fname" label="First name" type="text" fullWidth inputRef={fnameRef} />
+                            <TextField required margin="dense" id="lname" label="Last name" type="text" fullWidth inputRef={lnameRef} />
+                            <TextField required margin="dense" id="email" label="Email Address" type="email" fullWidth inputRef={emailRef} />
+                            <DialogActions>
+                              <Button onClick={handleClose} color="primary">
+                                Cancel
+                              </Button>
+                              <Button type="submit" onClick={handleClose} color="primary">
+                                Add user
+                              </Button>
+                            </DialogActions>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
                     </Grid>
                   </Grid>
                 </>
@@ -91,8 +138,20 @@ const User = ({ users, getUsers }) => {
           )}
         </Grid>
       </Container>
+
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   );
 };
 
-export default connect((store) => ({ users: store.users }), { getUsers })(User);
+export default connect((store) => ({ users: store.users }), { getUsers, createUser })(User);
