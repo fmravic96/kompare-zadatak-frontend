@@ -127,9 +127,11 @@ const User = () => {
     { field: "email", headerName: "Email", flex: 1 },
   ];
 
-  users.map((user) => {
-    return rows.push({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email });
-  });
+  if (users) {
+    users.map((user) => {
+      return rows.push({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email });
+    });
+  }
 
   return (
     <>
