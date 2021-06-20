@@ -31,7 +31,9 @@ const theme = createMuiTheme({
 
 const User = ({ users, getUsers }) => {
   useEffect(() => {
-    getUsers();
+    setTimeout(() => {
+      getUsers();
+    }, 2000);
   }, [getUsers]);
 
   const classes = useStyles();
@@ -49,37 +51,37 @@ const User = ({ users, getUsers }) => {
 
   return (
     <>
-      {users && users.length === 0 ? (
-        <Typography variant="h3">No users available.</Typography>
-      ) : (
-        <Container maxWidth="sm">
-          {console.log(rows)}
-          <Grid container justify="center" spacing={8} className={classes.root}>
-            <Grid item xs={12}>
-              <Typography variant="h3" gutterBottom>
-                <b>Zadatak - Kompare</b>
-              </Typography>
-            </Grid>
-
-            <div style={{ width: "100%" }}>
-              <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection hideFooterPagination />
-            </div>
-
-            <Grid item xs={12}>
-              <Grid container justify="center">
-                <ThemeProvider theme={theme}>
-                  <Button variant="contained" color="primary" className={classes.actionButtons} startIcon={<AddIcon />}>
-                    Add new user
-                  </Button>
-                  <Button variant="contained" color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
-                    Delete selected user/s
-                  </Button>
-                </ThemeProvider>
-              </Grid>
-            </Grid>
+      <Container maxWidth="sm">
+        <Grid container justify="center" spacing={8} className={classes.root}>
+          <Grid item xs={12}>
+            <Typography variant="h3" gutterBottom>
+              <b>Zadatak - Kompare</b>
+            </Typography>
           </Grid>
-        </Container>
-      )}
+          {users.length === 0 ? (
+            <Typography variant="h3">No users available.</Typography>
+          ) : (
+            <>
+              <div style={{ width: "100%" }}>
+                <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection hideFooterPagination />
+              </div>
+
+              <Grid item xs={12}>
+                <Grid container justify="center">
+                  <ThemeProvider theme={theme}>
+                    <Button variant="contained" color="primary" className={classes.actionButtons} startIcon={<AddIcon />}>
+                      Add new user
+                    </Button>
+                    <Button variant="contained" color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
+                      Delete selected user/s
+                    </Button>
+                  </ThemeProvider>
+                </Grid>
+              </Grid>
+            </>
+          )}
+        </Grid>
+      </Container>
     </>
   );
 };
