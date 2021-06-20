@@ -7,7 +7,7 @@ import { createMuiTheme } from "@material-ui/core/styles";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
 import { DataGrid } from "@material-ui/data-grid";
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -30,12 +30,18 @@ const theme = createMuiTheme({
   },
 });
 
-const User = ({ users, getUsers, createUser, deleteUsers }) => {
+const User = () => {
   const [open, setOpen] = useState(false);
   const [selectionModel, setSelectionModel] = useState([]);
+
+  const users = useSelector((state) => state.users);
+  const dispatch = useDispatch();
+
+  let rows = [];
+
   useEffect(() => {
-    getUsers();
-  }, [getUsers]);
+    dispatch(getUsers());
+  }, [dispatch]);
 
   const classes = useStyles();
 
@@ -54,13 +60,13 @@ const User = ({ users, getUsers, createUser, deleteUsers }) => {
       lastName: lnameRef.current.value,
       email: emailRef.current.value,
     };
-    createUser(data);
+    dispatch(createUser(data));
     toast.success(`Added user ${data.firstName} ${data.lastName}`);
     setOpen(false);
   };
 
   const handleDelete = () => {
-    deleteUsers(selectionModel);
+    dispatch(deleteUsers(selectionModel));
     toast.success(`Deleted ${selectionModel.length} user/s`);
   };
 
@@ -74,12 +80,9 @@ const User = ({ users, getUsers, createUser, deleteUsers }) => {
     { field: "email", headerName: "Email", flex: 1 },
   ];
 
-  let rows = [];
-  if (users) {
-    users.map((user) => {
-      return rows.push({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email });
-    });
-  }
+  users.map((user) => {
+    return rows.push({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email });
+  });
 
   return (
     <>
@@ -91,25 +94,22 @@ const User = ({ users, getUsers, createUser, deleteUsers }) => {
             </Typography>
           </Grid>
 
-          {users?.length === 0 ? (
-            <Typography variant="h3">No users available.</Typography>
-          ) : (
-            <div style={{ width: "100%" }}>
-              <DataGrid
-                rows={rows}
-                columns={columns}
-                autoHeight
-                checkboxSelection
-                pageSize={10}
-                pagination
-                loading={users === null}
-                onSelectionModelChange={(newSelection) => {
-                  setSelectionModel(newSelection.selectionModel);
-                }}
-                selectionModel={selectionModel}
-              />
-            </div>
-          )}
+          <div style={{ width: "100%" }}>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              autoHeight
+              checkboxSelection
+              pageSize={10}
+              pagination
+              loading={users === null}
+              onSelectionModelChange={(newSelection) => {
+                setSelectionModel(newSelection.selectionModel);
+              }}
+              selectionModel={selectionModel}
+            />
+          </div>
+
           <Grid item xs={12}>
             <Grid container justify="center">
               <ThemeProvider theme={theme}>
@@ -158,4 +158,4 @@ const User = ({ users, getUsers, createUser, deleteUsers }) => {
   );
 };
 
-export default connect((store) => ({ users: store.users }), { getUsers, createUser, deleteUsers })(User);
+export default User;
