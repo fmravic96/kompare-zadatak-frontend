@@ -10,11 +10,8 @@ const persistConfig = {
   key: "root",
   storage,
 };
-const DEFAULT_STATE = {
-  errors: { message: null },
-};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-export const store = createStore(persistedReducer, DEFAULT_STATE, composeEnhancers(applyMiddleware(thunk)));
+export const store = createStore(persistedReducer, composeEnhancers(applyMiddleware(thunk)));
 export const persistor = persistStore(store);

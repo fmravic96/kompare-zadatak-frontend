@@ -10,6 +10,7 @@ import { DataGrid } from "@material-ui/data-grid";
 import { connect } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ClipLoader from "react-spinners/ClipLoader";
 
 import { getUsers } from "./store/actions/users";
 
@@ -45,9 +46,11 @@ const User = ({ users, getUsers }) => {
   ];
 
   let rows = [];
-  users.map((user) => {
-    return rows.push({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email });
-  });
+  if (users) {
+    users.map((user) => {
+      return rows.push({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email });
+    });
+  }
 
   return (
     <>
@@ -58,27 +61,33 @@ const User = ({ users, getUsers }) => {
               <b>Zadatak - Kompare</b>
             </Typography>
           </Grid>
-          {users.length === 0 ? (
-            <Typography variant="h3">No users available.</Typography>
-          ) : (
+          {users ? (
             <>
-              <div style={{ width: "100%" }}>
-                <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection hideFooterPagination />
-              </div>
+              {users.length === 0 ? (
+                <Typography variant="h3">No users available.</Typography>
+              ) : (
+                <>
+                  <div style={{ width: "100%" }}>
+                    <DataGrid rows={rows} columns={columns} autoHeight checkboxSelection hideFooterPagination />
+                  </div>
 
-              <Grid item xs={12}>
-                <Grid container justify="center">
-                  <ThemeProvider theme={theme}>
-                    <Button variant="contained" color="primary" className={classes.actionButtons} startIcon={<AddIcon />}>
-                      Add new user
-                    </Button>
-                    <Button variant="contained" color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
-                      Delete selected user/s
-                    </Button>
-                  </ThemeProvider>
-                </Grid>
-              </Grid>
+                  <Grid item xs={12}>
+                    <Grid container justify="center">
+                      <ThemeProvider theme={theme}>
+                        <Button variant="contained" color="primary" className={classes.actionButtons} startIcon={<AddIcon />}>
+                          Add new user
+                        </Button>
+                        <Button variant="contained" color="secondary" className={classes.actionButtons} startIcon={<DeleteIcon />}>
+                          Delete selected user/s
+                        </Button>
+                      </ThemeProvider>
+                    </Grid>
+                  </Grid>
+                </>
+              )}
             </>
+          ) : (
+            <ClipLoader color="teal" size={150} />
           )}
         </Grid>
       </Container>
