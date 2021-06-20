@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const host = "http://localhost:8000/api";
+const host = "https://zadatak-kompare-backend.herokuapp.com/api";
 
 export const call = async (method, path, data) => {
   try {
